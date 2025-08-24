@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Child Health Record</title>
+    <style>
+     body{
+         color:black;
+         background-color:white;
+         font-family:Arial,sans-serif;
+         font-size:18px;
+         font-weight:normal;
+     }
+     #savedData {
+         margin-top:20px;
+         padding:15px;
+         border:1px solid #ccc;
+         border-radius:5px;
+         background:#f9f9f9;
+     }
+     #savedData h3 {
+         margin-top:0;
+     }
+   </style>
+   </head>
+   <body>
+      <h2>Welcome to Child Health Records</h2>
+      <p>Please fill in your child's health details in the form below.</p> 
+     
+      <form id="Health-form">
+         <label for="ChildName">Child Name:</label> <br>
+         <input type="text" id="ChildName" name="ChildName" required><br>
+         
+         <label for="DateOfBirth">DOB:</label> <br>
+         <input type="text" id="DateOfBirth" name="DOB" required><br>
+         
+         <label for="Gender">Gender:</label>
+         <label><input type="radio" name="gender" value="Male"> Male</label>
+         <label><input type="radio" name="gender" value="Female"> Female</label>
+         <label><input type="radio" name="gender" value="Other"> Other</label><br>
+
+         <label>Height (cm):</label><br>
+         <input type="number" name="height" required><br>
+
+         <label>Weight (kg):</label><br>
+         <input type="number" name="weight" required><br>
+
+         <label for="VaccinationStatus">Vaccination Status:</label><br>
+         <select name="vaccinationStatus" required>
+           <option value="Up to date">Up to date</option>
+           <option value="Not up to date">Not up to date</option>
+           <option value="Unknown">Unknown</option>
+         </select><br>
+
+         <label for="HealthIssues">Health Issues:</label><br>
+         <textarea name="healthIssues" rows="4"></textarea><br>
+         
+         <label for="BirthmarkPhoto">Birthmark Photo:</label><br>
+         <input type="file" name="birthmarkPhoto" accept="image/*"><br>
+
+         <button type="submit">Save Offline</button>
+      </form>
+
+      <div class="status" id="status"></div>
+
+      <div id="savedData" style="display:none;">
+          <h3>Saved Child Record</h3>
+          <pre id="dataOutput"></pre>
+      </div>
+
+  <script>
+    const form = document.getElementById('Health-form');
+    const statusMsg = document.getElementById('status');
+    const savedDataDiv = document.getElementById('savedData');
+    const dataOutput = document.getElementById('dataOutput');
+
+    // Save data to localStorage
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const data = {};
+
+      formData.forEach((value, key) => {
+        data[key] = value;
+      });
+
+      localStorage.setItem('childHealthRecord', JSON.stringify(data));
+
+      statusMsg.textContent = 'Saved offline successfully!';
+      displaySavedData();
+    });
+
+    // Function to display saved data
+    function displaySavedData() {
+      const savedData = localStorage.getItem('childHealthRecord');
+      if (savedData) {
+        const data = JSON.parse(savedData);
+        dataOutput.textContent = JSON.stringify(data, null, 2); // Pretty print
+        savedDataDiv.style.display = 'block';
+      }
+    }
+
+    // Show saved data on page load
+    window.addEventListener('load', displaySavedData);
+  </script>
+
+ </body>
+ </html>
