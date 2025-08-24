@@ -3,77 +3,71 @@
 <head>
     <title>Child Health Record</title>
     <style>
-     body{
-         color:black;
-         background-color:white;
-         font-family:Arial,sans-serif;
-         font-size:18px;
-         font-weight:normal;
+     body {
+         color: black;
+         background-color: white;
+         font-family: Arial, sans-serif;
+         font-size: 18px;
+         font-weight: normal;
      }
-     #savedData {
-         margin-top:20px;
-         padding:15px;
-         border:1px solid #ccc;
-         border-radius:5px;
-         background:#f9f9f9;
-     }
-     #savedData h3 {
-         margin-top:0;
+     img {
+         margin-top: 10px;
+         max-width: 200px;
+         border: 1px solid #ccc;
+         border-radius: 8px;
      }
    </style>
    </head>
    <body>
       <h2>Welcome to Child Health Records</h2>
       <p>Please fill in your child's health details in the form below.</p> 
-     
-      <form id="Health-form">
-         <label for="ChildName">Child Name:</label> <br>
-         <input type="text" id="ChildName" name="ChildName" required><br>
-         
-         <label for="DateOfBirth">DOB:</label> <br>
-         <input type="text" id="DateOfBirth" name="DOB" required><br>
-         
-         <label for="Gender">Gender:</label>
-         <label><input type="radio" name="gender" value="Male"> Male</label>
-         <label><input type="radio" name="gender" value="Female"> Female</label>
-         <label><input type="radio" name="gender" value="Other"> Other</label><br>
 
-         <label>Height (cm):</label><br>
-         <input type="number" name="height" required><br>
+     <form id="Health-form">
+        <label>Child Name:</label><br>
+        <input type="text" id="ChildName" name="ChildName" required><br>
 
-         <label>Weight (kg):</label><br>
-         <input type="number" name="weight" required><br>
+        <label>DOB:</label><br>
+        <input type="text" id="DateOfBirth" name="DOB" required><br>
 
-         <label for="VaccinationStatus">Vaccination Status:</label><br>
-         <select name="vaccinationStatus" required>
-           <option value="Up to date">Up to date</option>
-           <option value="Not up to date">Not up to date</option>
-           <option value="Unknown">Unknown</option>
-         </select><br>
+        <label>Gender:</label>
+        <label><input type="radio" name="gender" value="Male"> Male</label>
+        <label><input type="radio" name="gender" value="Female"> Female</label>
+        <label><input type="radio" name="gender" value="Other"> Other</label><br>
 
-         <label for="HealthIssues">Health Issues:</label><br>
-         <textarea name="healthIssues" rows="4"></textarea><br>
-         
-         <label for="BirthmarkPhoto">Birthmark Photo:</label><br>
-         <input type="file" name="birthmarkPhoto" accept="image/*"><br>
+        <label>Height (cm):</label><br>
+        <input type="number" name="height" required><br>
 
-         <button type="submit">Save Offline</button>
-      </form>
+        <label>Weight (kg):</label><br>
+        <input type="number" name="weight" required><br>
 
-      <div class="status" id="status"></div>
+        <label>Vaccination Status:</label><br>
+        <select name="vaccinationStatus" required>
+          <option value="Up to date">Up to date</option>
+          <option value="Not up to date">Not up to date</option>
+          <option value="Unknown">Unknown</option>
+        </select><br>
 
-      <div id="savedData" style="display:none;">
-          <h3>Saved Child Record</h3>
-          <pre id="dataOutput"></pre>
-      </div>
+        <label>Health Issues:</label><br>
+        <textarea name="healthIssues" rows="4"></textarea><br>
+
+        <label>Birthmark Photo:</label><br>
+        <input type="file" id="birthmarkPhoto" name="birthmarkPhoto" accept="image/*"><br>
+
+        <button type="submit">Save Offline</button>
+     </form>
+
+     <div class="status" id="status"></div>
+
+     <h3>Saved Child Record</h3>
+     <pre id="savedRecord"></pre>
+     <div id="savedImage"></div>
 
   <script>
     const form = document.getElementById('Health-form');
     const statusMsg = document.getElementById('status');
-    const savedDataDiv = document.getElementById('savedData');
-    const dataOutput = document.getElementById('dataOutput');
+    const savedRecord = document.getElementById('savedRecord');
+    const savedImage = document.getElementById('savedImage');
 
-    // Save data to localStorage
     form.addEventListener('submit', function(e) {
       e.preventDefault();
 
@@ -84,24 +78,37 @@
         data[key] = value;
       });
 
-      localStorage.setItem('childHealthRecord', JSON.stringify(data));
+      const file = document.getElementById('birthmarkPhoto').files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          data.birthmarkPhoto = event.target.result; // Base64 string
+          localStorage.setItem('childHealthRecord', JSON.stringify(data));
+          showSavedData();
+        };
+        reader.readAsDataURL(file);
+      } else {
+        localStorage.setItem('childHealthRecord', JSON.stringify(data));
+        showSavedData();
+      }
 
       statusMsg.textContent = 'Saved offline successfully!';
-      displaySavedData();
     });
 
-    // Function to display saved data
-    function displaySavedData() {
-      const savedData = localStorage.getItem('childHealthRecord');
-      if (savedData) {
-        const data = JSON.parse(savedData);
-        dataOutput.textContent = JSON.stringify(data, null, 2); // Pretty print
-        savedDataDiv.style.display = 'block';
+    function showSavedData() {
+      const savedData = JSON.parse(localStorage.getItem('childHealthRecord'));
+      savedRecord.textContent = JSON.stringify(savedData, null, 2);
+
+      savedImage.innerHTML = "";
+      if (savedData.birthmarkPhoto) {
+        const img = document.createElement("img");
+        img.src = savedData.birthmarkPhoto;
+        savedImage.appendChild(img);
       }
     }
 
-    // Show saved data on page load
-    window.addEventListener('load', displaySavedData);
+    // Load saved data on page load
+    window.onload = showSavedData;
   </script>
 
  </body>
